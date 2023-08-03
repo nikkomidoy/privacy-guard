@@ -26,3 +26,13 @@ Please make sure you create a `.env` file and write include this variables.
 DJANGO_READ_DOT_ENV_FILE=True
 CELERY_BROKER_URL="redis://localhost:6379/0"
 ```
+
+## Encryption
+
+Manage to add encryption usage using `django-pgcrypto-fields` but there are couple of issues that wasn't resolved due to lack of time.
+
+- Operational error after login as it needs `secret key`
+
+For this coding challenge, I only encrypted the `name` and `email` fields.
+
+These were the critical data that so far based on this challenge.

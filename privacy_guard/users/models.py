@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models import CharField, EmailField
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from pgcrypto import fields
 
 from privacy_guard.users.managers import UserManager
 
@@ -14,10 +15,10 @@ class User(AbstractUser):
     """
 
     # First and last name do not cover name patterns around the globe
-    name = CharField(_("Name of User"), blank=True, max_length=255)
+    name = fields.CharPGPPublicKeyField(_("Name of User"), blank=True, max_length=255)
     first_name = None  # type: ignore
     last_name = None  # type: ignore
-    email = EmailField(_("email address"), unique=True)
+    email = fields.EmailPGPPublicKeyField(_("email address"), unique=True)
     username = None  # type: ignore
 
     USERNAME_FIELD = "email"

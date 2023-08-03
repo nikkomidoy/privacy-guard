@@ -3,6 +3,7 @@ Base settings to build other settings files upon.
 """
 from pathlib import Path
 
+import os
 import environ
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
@@ -38,15 +39,50 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#locale-paths
 LOCALE_PATHS = [str(BASE_DIR / "locale")]
 
+# Encryption settings
+# ------------------------------------------------------------------------------
+BASEDIR = os.path.dirname(os.path.dirname(__file__))
+PUBLIC_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'public.key'))
+PRIVATE_PGP_KEY_PATH = os.path.abspath(os.path.join(BASEDIR, 'private.key'))
+
+# Used by PGPPublicKeyField used by default if not specified by the db
+PUBLIC_PGP_KEY = open(PUBLIC_PGP_KEY_PATH).read()
+PRIVATE_PGP_KEY = open(PRIVATE_PGP_KEY_PATH).read()
+
+# Used by TextHMACField and PGPSymmetricKeyField if not specified by the db
+PGCRYPTO_KEY='ultrasecret'
+
+DIFF_PUBLIC_PGP_KEY_PATH = os.path.abspath(
+    os.path.join(BASEDIR, 'tests/keys/public_diff.key')
+)
+DIFF_PRIVATE_PGP_KEY_PATH = os.path.abspath(
+    os.path.join(BASEDIR, 'tests/keys/private_diff.key')
+)
+
 # DATABASES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
 DATABASES = {
-    "default": env.db(
-        "DATABASE_URL",
-        default="postgres:///privacy_guard_db",
-    ),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "privacy_guard_db",
+        "USER": "",
+        "PASSWORD": "",
+        "HOST": "",
+        "PORT": "",
+    },
+    'diff_keys': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'pgcrypto_fields_diff',
+        'USER': "",
+        'PASSWORD': "",
+        'HOST': "",
+        'PORT': "",
+        'PGCRYPTO_KEY': "djangorocks",
+        'PUBLIC_PGP_KEY': open(DIFF_PUBLIC_PGP_KEY_PATH, 'r').read(),
+        'PRIVATE_PGP_KEY': open(DIFF_PRIVATE_PGP_KEY_PATH, 'r').read(),
+    },
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
@@ -85,6 +121,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "drf_spectacular",
     "django_object_actions",
+    "pgcrypto",
 ]
 
 LOCAL_APPS = [
@@ -351,5 +388,5 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAdminUser"],
 }
-# Your stuff...
+# Your stuff.
 # ------------------------------------------------------------------------------
